@@ -17,9 +17,9 @@ const StudentsPage = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-      const response = await studentAPI.getStudents({
-        limit: 100
-      });
+   const response = await studentAPI.getAllStudents({
+    limit: 100
+  });
       if (response.data.success) {
         setStudents(response.data.students);
       }
