@@ -182,8 +182,8 @@ const CreateTestModal = ({ isOpen, onClose, onSuccess, initial }) => {
               <option value="midterm">Midterm</option>
               <option value="final">Final</option>
               <option value="supplementary">Supplementary</option>
-              <option value="practical">Practical</option>
-              <option value="quiz">Quiz</option>
+              <option value="practical">Practice test</option>
+              
             </select>
           </div>
 

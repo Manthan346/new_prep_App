@@ -17,24 +17,34 @@ const StudentsPage = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true);
-   const response = await studentAPI.getAllStudents({
-    limit: 100
-  });
+      const response = await studentAPI.getAllStudents({ limit: 100 });
       if (response.data.success) {
-        setStudents(response.data.students);
+        setStudents(response.data.students || []);
+      } else {
+        setStudents([]);
       }
     } catch (err) {
       error('Error', 'Failed to load students');
+      setStudents([]);
       console.error('Students error:', err);
     } finally {
       setLoading(false);
     }
   };
+  const refreshDashboard = async () => {
+  const response = await studentAPI.getDashboard();
+  if (response.data.success) {
+    setDashboardData(response.data.data); // update your dashboard state
+  }
+};
 
-  const filteredStudents = students.filter(student =>
-    student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (student.rollNumber && student.rollNumber.toLowerCase().includes(searchTerm.toLowerCase()))
+// Pass refreshDashboard as onSuccess prop to MarksEntryModal to auto-refresh after submit
+
+
+  const filteredStudents = (students || []).filter(student =>
+    (student.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.rollNumber?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   if (loading) {
@@ -46,9 +56,7 @@ const StudentsPage = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Students</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Manage student records and performance
-        </p>
+        <p className="mt-1 text-sm text-gray-600">Manage student records and performance</p>
       </div>
 
       {/* Search */}
@@ -78,52 +86,30 @@ const StudentsPage = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Student
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Roll Number
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Department
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Year
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Roll Number</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Year</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredStudents.map((student) => (
+                {filteredStudents.map(student => (
                   <tr key={student._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center">
-                          <span className="text-white text-sm font-medium">
-                            {student.name.charAt(0).toUpperCase()}
-                          </span>
+                          <span className="text-white text-sm font-medium">{student.name.charAt(0).toUpperCase()}</span>
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {student.name}
-                          </div>
+                          <div className="text-sm font-medium text-gray-900">{student.name}</div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.rollNumber || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.department || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.year || 'N/A'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {student.email}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.rollNumber || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.department || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.year || 'N/A'}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{student.email}</td>
                   </tr>
                 ))}
               </tbody>
@@ -133,9 +119,7 @@ const StudentsPage = () => {
           <div className="text-center py-12">
             <Users className="mx-auto h-12 w-12 text-gray-400" />
             <h3 className="mt-2 text-sm font-medium text-gray-900">No students found</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Try adjusting your search terms.' : 'No students are currently registered.'}
-            </p>
+            <p className="mt-1 text-sm text-gray-500">{searchTerm ? 'Try adjusting your search terms.' : 'No students are currently registered.'}</p>
           </div>
         )}
       </div>

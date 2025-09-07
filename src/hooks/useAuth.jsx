@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext, createContext } from 'react';
-import { authAPI } from '../services/api';
+import * as apiService from '../services/api';
 
 const AuthContext = createContext();
 
@@ -25,7 +25,7 @@ export const AuthProvider = ({ children }) => {
       if (token && userData) {
         try {
           // Verify token with backend
-          const response = await authAPI.verifyToken();
+          const response = await apiService.authAPI.verifyToken();
           if (response.data.success) {
             setUser(response.data.user);
             setIsAuthenticated(true);
@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setLoading(true);
-      const response = await authAPI.login(credentials);
+  const response = await apiService.authAPI.login(credentials);
 
       if (response.data.success) {
         const { user, token } = response.data;
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
-      const response = await authAPI.register(userData);
+  const response = await apiService.authAPI.register(userData);
 
       if (response.data.success) {
         const { user, token } = response.data;

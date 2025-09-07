@@ -2,6 +2,7 @@
 
 import axios from 'axios';
 
+
 // Create axios instance with default configuration
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
@@ -54,24 +55,27 @@ api.interceptors.response.use(
 
 // Student API
 export const studentAPI = {
-  getDashboard: () => api.get('/dashboard/student/dashboard'),
+  getAllStudents: (params = {}) => api.get('/students/', { params }),
+  // backend exposes GET /api/dashboard/student
+  getDashboard: () => api.get('/dashboard/student'),
   getResults: (params = {}) => api.get('/dashboard/student/results', { params }),
   getPerformance: () => api.get('/dashboard/student/performance'),
-  getAllStudents: (params = {}) => api.get('/dashboard/student/', { params }),
-  getStudentPerformance: (studentId) => api.get(`/dashboard/student/performance/${studentId}`),
+  getStudentPerformance: (studentId) =>
+    api.get(`/dashboard/student/performance/${studentId}`),
 };
 
 // Test API
 export const testAPI = {
-  getAllTests: (params = {}) => api.get('/tests', { params }),
-  // alias to avoid import errors
-  getTests: (params = {}) => api.get('/tests', { params }),
-  getTest: (id) => api.get(`/tests/${id}`),
-  createTest: (data) => api.post('/tests', data),
+  getTests: params => api.get('/tests', { params }),
+  getTest: id => api.get(`/tests/${id}`),
+  createTest: data => api.post('/tests', data),
   updateTest: (id, data) => api.put(`/tests/${id}`, data),
-  deleteTest: (id) => api.delete(`/tests/${id}`),
-  addMarks: (testId, marks) => api.post(`/tests/${testId}/marks`, { marks }),
-  getTestResults: (testId) => api.get(`/tests/${testId}/results`),
+  deleteTest: id => api.delete(`/tests/${id}`),
+
+  getTestMarks: id => api.get(`/tests/${id}/marks`),
+  addOrUpdateMarks: (id, data) => api.post(`/tests/${id}/marks`, data),
+  getTestResults: id => api.get(`/tests/${id}/results`),
+  getTestStatistics: id => api.get(`/tests/${id}/statistics`)
 };
 
 // Subject API
@@ -93,6 +97,18 @@ export const authAPI = {
 // Dashboard API (admin)
 export const dashboardAPI = {
   getAdminDashboard: () => api.get('/dashboard'),
+};
+
+// Announcements API
+export const announcementsAPI = {
+  list: (params = {}) => api.get('/announcements', { params }),
+  get: (id) => api.get(`/announcements/${id}`),
+  create: (data) => api.post('/announcements', data)
+  ,
+  update: (id, data) => api.put(`/announcements/${id}`, data),
+  remove: (id) => api.delete(`/announcements/${id}`),
+  apply: (id) => api.post(`/announcements/${id}/apply`),
+  getApplicants: (id) => api.get(`/announcements/${id}/applicants`),
 };
 
 // Utility functions

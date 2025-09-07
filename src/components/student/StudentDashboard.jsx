@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../../services/api';
+import { studentAPI } from '../../services/api';
 import Card from '../common/Card';
 import PerformanceCard from '../common/PerformanceCard';
 import MarksGraph from '../common/MarksGraph';
@@ -20,8 +20,10 @@ const Dashboard = () => {
 
   const fetchStudentDashboard = async () => {
     try {
-      const response = await api.get('/dashboard/student');
-      setDashboardData(response.data);
+      // use studentAPI helper which points to the correct dashboard endpoints
+      const resp = await studentAPI.getDashboard();
+      // studentAPI.getDashboard() returns the axios response
+      setDashboardData(resp.data.data);
     } catch (err) {
       setError('Failed to load dashboard data');
     } finally {
@@ -51,13 +53,8 @@ const Dashboard = () => {
       </div>
 
       {/* Performance Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <PerformanceCard
-          title="Total Subjects"
-          value={stats?.totalSubjects || 0}
-          icon={<BookOpen className="h-6 w-6" />}
-          color="bg-blue-600"
-        />
+      <div className="grid grid-cols-2 lg:grid-cols-2 md:grid-cols-4 gap-4">
+     
         <PerformanceCard
           title="Total Tests"
           value={stats?.totalTests || 0}
@@ -70,12 +67,7 @@ const Dashboard = () => {
           icon={<Calendar className="h-6 w-6" />}
           color="bg-purple-600"
         />
-        <PerformanceCard
-          title="Average Grade"
-          value={stats?.averageGrade || 'N/A'}
-          icon={<TrendingUp className="h-6 w-6" />}
-          color="bg-orange-600"
-        />
+    
       </div>
 
       {/* Overall Performance Graph */}

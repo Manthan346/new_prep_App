@@ -23,6 +23,7 @@ const MarksEntryModal = ({ test, isOpen, onClose, onSuccess }) => {
   if (!test || !isOpen) {
     return null;
   }
+  
 
   const fetchStudentsAndMarks = async () => {
     try {
@@ -31,28 +32,24 @@ const MarksEntryModal = ({ test, isOpen, onClose, onSuccess }) => {
       
       // Fetch students and existing marks in parallel
       const [studentsResponse, marksResponse] = await Promise.all([
-        studentAPI.getStudents({ limit: 100 }).catch(() => null),
-        testAPI.getTestMarks(test._id).catch(() => null)
+        studentAPI.getAllStudents({ limit: 100 }).catch(() => null),
+         testAPI.getTestResults(test._id).catch(() => null)
       ]);
 
       console.log('📊 Students response:', studentsResponse);
       console.log('📊 Existing marks response:', marksResponse);
 
       // Get students list
-      let studentData = [];
-      if (studentsResponse?.data?.success && studentsResponse.data.students?.length > 0) {
-        studentData = studentsResponse.data.students;
-        console.log('✅ Found real students:', studentData.length);
-      } else {
-        console.log('⚠️ Using mock students');
-        studentData = [
-          { _id: '1', name: 'John Doe', rollNumber: 'ST001', email: 'john@example.com' },
-          { _id: '2', name: 'Jane Smith', rollNumber: 'ST002', email: 'jane@example.com' },
-          { _id: '3', name: 'Bob Johnson', rollNumber: 'ST003', email: 'bob@example.com' },
-          { _id: '4', name: 'Alice Brown', rollNumber: 'ST004', email: 'alice@example.com' },
-          { _id: '5', name: 'Charlie Davis', rollNumber: 'ST005', email: 'charlie@example.com' }
-        ];
-      }
+        let studentData = [];
+        if (studentsResponse?.data?.success && studentsResponse.data.students?.length > 0) {
+          studentData = studentsResponse.data.students;
+          setStudents(studentData);
+          console.log('✅ Found real students:', studentData.length);
+        } else {
+          setStudents([]);
+          error('Error', 'No students found from backend');
+          return;
+        }
 
       setStudents(studentData);
 
@@ -127,63 +124,38 @@ const MarksEntryModal = ({ test, isOpen, onClose, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const validMarks = marks.filter(mark => 
-      mark.marksObtained !== '' && mark.marksObtained !== null
-    );
-
+    const validMarks = marks.filter(mark => mark.marksObtained !== '' && mark.marksObtained !== null);
     if (validMarks.length === 0) {
-      error('Error', 'Please enter marks for at least one student');
+      error('Please enter marks for at least one student');
       return;
     }
 
-    const invalidMarks = validMarks.filter(mark => {
-      const marksNum = parseFloat(mark.marksObtained);
-      return isNaN(marksNum) || marksNum < 0 || marksNum > test.maxMarks;
-    });
+    const marksData = {
+      marks: validMarks.map(mark => ({
+        student: mark.studentId || mark.student || mark.studentId,
+        marksObtained: parseFloat(mark.marksObtained),
+        remarks: (mark.remarks || '').trim()
+      }))
+    };
 
-    if (invalidMarks.length > 0) {
-      error('Error', `Marks must be between 0 and ${test.maxMarks}`);
-      return;
-    }
+    console.log('Submitting marks payload for test', test._id, marksData);
 
     try {
       setSubmitting(true);
-      
-      const marksData = {
-        results: validMarks.map(mark => ({
-          student: mark.studentId,
-          marksObtained: parseFloat(mark.marksObtained),
-          remarks: (mark.remarks || '').trim()
-        }))
-      };
-
-      console.log('📤 Submitting marks:', marksData);
-
-      const response = await testAPI.submitMarks(test._id, marksData);
-      
-      console.log('📥 Backend response:', response);
+      const response = await testAPI.addOrUpdateMarks(test._id, marksData);
+      console.log('Submit marks response:', response?.data || response);
 
       if (response?.data?.success) {
-        const processedCount = response.data.processed || response.data.data?.results?.length || validMarks.length;
-        success('Success', `Marks ${hasExistingMarks ? 'updated' : 'submitted'} for ${processedCount} students`);
-        
-        if (onSuccess) onSuccess();
-        onClose();
+        success(`${hasExistingMarks ? 'Updated' : 'Submitted'} marks successfully`);
+        onSuccess && onSuccess();
+        onClose && onClose();
       } else {
-        error('Error', response?.data?.message || 'Failed to submit marks');
+        console.error('Unexpected response saving marks:', response?.data);
+        error(response?.data?.message || 'Failed to submit marks');
       }
-
     } catch (err) {
-      console.error('❌ Submit error:', err);
-      
-      if (err.response?.status === 200) {
-        success('Success', 'Marks have been saved successfully');
-        if (onSuccess) onSuccess();
-        onClose();
-      } else {
-        error('Error', err.response?.data?.message || 'Failed to submit marks');
-      }
+      console.error('Submit error:', err.response || err.message || err);
+      error(err.response?.data?.message || 'Failed to submit marks');
     } finally {
       setSubmitting(false);
     }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import api from '../services/api';
+import { studentAPI } from '../../services/api';
 import Card from '../components/common/Card';
 import MarksGraph from '../common/MarksGraph';
 import PerformanceCard from '../common/PerformanceCard';
@@ -19,12 +19,12 @@ const StudentResult = () => {
     try {
       setLoading(true);
       const [resultsRes, performanceRes] = await Promise.all([
-        api.get('/dashboard/student/results'),
-        api.get('/dashboard/student/performance')
+        studentAPI.getResults(),
+        studentAPI.getPerformance()
       ]);
 
       setResults(resultsRes.data.results || []);
-      setPerformance(performanceRes.data);
+      setPerformance(performanceRes.data.data || performanceRes.data);
       setError('');
     } catch (err) {
       console.error('Error fetching student data:', err);

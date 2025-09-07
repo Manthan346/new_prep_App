@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Theme } from '@radix-ui/themes';
 import { AuthProvider, useAuth } from './hooks/useAuth';
+import { NotificationProvider } from './components/common/Notification';
 
 // Import pages
 import Login from './pages/Login';
@@ -10,6 +11,9 @@ import Dashboard from './pages/Dashboard';
 import Tests from './pages/Tests';
 import AdminPage from './pages/AdminPage';
 import StudentsPage from './pages/StudentsPage';
+import Performance from './pages/Performance';
+import Announcements from './pages/Announcements';
+import AnnouncementApplicants from './pages/AnnouncementApplicants';
 
 // Import components
 import Layout from './components/layout/Layout';
@@ -53,6 +57,7 @@ const PublicRoute = ({ children }) => {
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
   }
+  
 
   return children;
 };
@@ -123,6 +128,38 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/performance"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+              <Layout>
+                <Performance />
+              </Layout>
+            </ProtectedRoute>
+          }
+      />
+
+      <Route
+        path="/announcements"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+            <Layout>
+              <Announcements />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/announcements/applicants"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Layout>
+              <AnnouncementApplicants />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
 
       {/* Default redirect */}
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
@@ -151,11 +188,13 @@ const App = () => {
   return (
     <Theme>
       <AuthProvider>
-        <BrowserRouter>
-          <div className="App">
-            <AppRoutes />
-          </div>
-        </BrowserRouter>
+        <NotificationProvider>
+          <BrowserRouter>
+            <div className="App">
+              <AppRoutes />
+            </div>
+          </BrowserRouter>
+        </NotificationProvider>
       </AuthProvider>
     </Theme>
   );

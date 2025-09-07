@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { formatDate } from '../../utils/helpers';
 
+import MarksStatsCard from '../common/MarksStatsCard'; // Import the new marks stats card
+
 const AdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -58,20 +60,9 @@ const AdminDashboard = () => {
       color: 'text-blue-600',
       change: 'Active students'
     },
-    {
-      name: 'Total Teachers',
-      value: stats.totalTeachers,
-      icon: User,
-      color: 'text-green-600',
-      change: 'Active teachers'
-    },
-    {
-      name: 'Subjects',
-      value: stats.totalSubjects,
-      icon: BookOpen,
-      color: 'text-purple-600',
-      change: 'Total subjects'
-    },
+    
+
+
     {
       name: 'Tests',
       value: stats.totalTests,
@@ -84,7 +75,7 @@ const AdminDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
         {statCards.map((stat) => (
           <div key={stat.name} className="card">
             <div className="flex items-center">
@@ -109,6 +100,9 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
+
+        {/* Render the MarksStatsCard separately here */}
+   
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -121,19 +115,18 @@ const AdminDashboard = () => {
           <div className="space-y-3">
             {recentUsers?.length > 0 ? (
               recentUsers.map((user) => (
-                <div key={user._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <div 
+                  key={user._id} 
+                  className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+                >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {user.name}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900">{user.name}</p>
                     <p className="text-xs text-gray-500">
                       {user.email} • {user.role}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-500">
-                      {formatDate(user.createdAt)}
-                    </p>
+                    <p className="text-xs text-gray-500">{formatDate(user.createdAt)}</p>
                   </div>
                 </div>
               ))
@@ -152,19 +145,18 @@ const AdminDashboard = () => {
           <div className="space-y-3">
             {recentTests?.length > 0 ? (
               recentTests.map((test) => (
-                <div key={test._id} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0">
+                <div 
+                  key={test._id} 
+                  className="flex items-center justify-between py-2 border-b border-gray-100 last:border-b-0"
+                >
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {test.title}
-                    </p>
+                    <p className="text-sm font-medium text-gray-900">{test.title}</p>
                     <p className="text-xs text-gray-500">
                       {test.subject?.name} • by {test.createdBy?.name}
                     </p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-gray-500">
-                      {formatDate(test.createdAt)}
-                    </p>
+                    <p className="text-xs text-gray-500">{formatDate(test.createdAt)}</p>
                   </div>
                 </div>
               ))
