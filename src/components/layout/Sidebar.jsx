@@ -18,6 +18,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
   const baseNavigation = [
     { name: 'Dashboard', href: '/dashboard', icon: Home },
+    { name: 'Aptitude Prep', href: '/aptitude-prep', icon: BookOpen },
   ];
 
   let roleNavigation = [];
@@ -39,6 +40,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   } else if (user?.role === 'student') {
     roleNavigation = [
       { name: 'My Tests', href: '/tests', icon: FileText },
+     
       { name: 'Performance', href: '/performance', icon: BarChart3 },
       { name: 'Announcements', href: '/announcements', icon: Megaphone },
     ];
@@ -65,7 +67,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       >
         <div className="flex h-16 items-center px-6">
           <GraduationCap className="h-8 w-8 text-blue-600" />
-          <span className="ml-2 text-lg font-semibold text-gray-900">PlacementReady</span>
+          <span className="ml-2 text-lg font-semibold text-gray-900">PlaceNet</span>
         </div>
 
         <nav className="flex flex-col p-4 space-y-2">

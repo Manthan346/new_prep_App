@@ -57,6 +57,8 @@ api.interceptors.response.use(
 export const studentAPI = {
   getAllStudents: (params = {}) => api.get('/students/', { params }),
   getDashboard: () => api.get('/dashboard/student'),
+  getPerformance: () => api.get('/students/performance'),
+  getMyResults: (params = {}) => api.get('/students/my-results', { params }),
 };
 
 // Dashboard API
@@ -103,7 +105,9 @@ export const announcementsAPI = {
   update: (id, data) => api.put(`/announcements/${id}`, data),
   remove: (id) => api.delete(`/announcements/${id}`),
   apply: (id) => api.post(`/announcements/${id}/apply`),
+  uploadResume: (id, formData) => api.post(`/announcements/${id}/upload-resume`, formData, { headers: { 'Content-Type': 'multipart/form-data' } }),
   getApplicants: (id) => api.get(`/announcements/${id}/applicants`),
+  getApplications: (id) => api.get(`/announcements/${id}/applications`),
   getAllJobsAndApplicants: () => api.get('/announcements/jobs/all-applicants'),
 };
 

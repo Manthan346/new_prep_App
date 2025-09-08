@@ -141,7 +141,7 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {subjectStats.map((stat, index) => (
               <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                <h3 className="font-medium">{stat.subject}</h3>
+                <h3 className="font-medium">{typeof stat.subject === 'string' ? stat.subject : (stat.subject?.name || 'Unknown')}</h3>
                 <div className="text-2xl font-bold text-blue-600">{stat.average}%</div>
                 <div className="text-sm text-gray-600">{stat.totalTests} tests</div>
               </div>

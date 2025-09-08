@@ -86,7 +86,7 @@ const Login = () => {
               Sign in to your account
             </h2>
             <p className="mt-2 text-lg font-normal text-gray-800">
-              Placement Readiness System
+              Placement Tracking System
             </p>
           </div>
 

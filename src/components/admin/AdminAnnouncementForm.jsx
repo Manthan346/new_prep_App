@@ -6,6 +6,7 @@ export default function AdminAnnouncementForm({ onCreated }) {
   const [body, setBody] = useState('');
   const [type, setType] = useState('general');
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Department targeting
   const departments = [
@@ -29,6 +30,13 @@ export default function AdminAnnouncementForm({ onCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrorMsg('');
+
+    // Validate department selection when not global
+    if (!isGlobal && targetDepartments.length === 0) {
+      setErrorMsg('Please select at least one department or choose All Departments.');
+      return;
+    }
     setLoading(true);
     try {
       const payload = { title, body, type, isGlobal, targetDepartments };
@@ -38,6 +46,8 @@ export default function AdminAnnouncementForm({ onCreated }) {
       onCreated && onCreated(res.data.announcement);
     } catch (err) {
       console.error(err);
+      const msg = err?.response?.data?.message || 'Failed to post announcement';
+      setErrorMsg(msg);
     } finally { setLoading(false); }
   };
 
@@ -88,6 +98,9 @@ export default function AdminAnnouncementForm({ onCreated }) {
       <div>
         <button disabled={loading} className="px-4 py-2 bg-blue-600 text-white rounded">{loading ? 'Posting...' : 'Post'}</button>
       </div>
+      {errorMsg && (
+        <div className="mt-3 text-sm text-red-600">{errorMsg}</div>
+      )}
     </form>
   );
 }

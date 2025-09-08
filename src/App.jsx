@@ -15,6 +15,8 @@ import Performance from './pages/Performance';
 import Announcements from './pages/Announcements';
 import AnnouncementApplicants from './pages/AnnouncementApplicants';
 import AllJobsAndApplicants from './components/admin/AllJobsAndApplicants';
+import AptitudePrep from './pages/AptitudePrep';
+
 
 // Import components
 import Layout from './components/layout/Layout';
@@ -138,6 +140,19 @@ const AppRoutes = () => {
               </Layout>
             </ProtectedRoute>
           }
+      />
+
+
+
+      <Route
+        path="/aptitude-prep"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'teacher', 'student']}>
+            <Layout>
+              <AptitudePrep />
+            </Layout>
+          </ProtectedRoute>
+        }
       />
 
       <Route

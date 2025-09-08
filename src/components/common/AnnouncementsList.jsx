@@ -3,6 +3,7 @@ import { Megaphone, Edit3, Trash2, Save, X } from 'lucide-react';
 import { announcementsAPI } from '../../services/api';
 import { useNotification } from '../common/Notification';
 import { useNavigate } from 'react-router-dom';
+import { useRef } from 'react';
 
 function Badge({ children }) {
   return (
@@ -106,7 +107,7 @@ export default function AnnouncementsList({ items = [], onUpdate, onDelete, curr
             <div className="flex items-center gap-2">
               <div className="text-xs text-gray-500">{a.isActive ? 'Active' : 'Inactive'}</div>
               {a.type === 'job' && currentUser?.role === 'student' && (
-                <ApplyButton announcement={a} />
+                <ApplyWithResumeButton announcement={a} />
               )}
             </div>
           </div>
@@ -116,10 +117,35 @@ export default function AnnouncementsList({ items = [], onUpdate, onDelete, curr
   );
 }
 
-function ApplyButton({ announcement }){
+function ApplyWithResumeButton({ announcement }){
   const notify = useNotification();
   const [loading, setLoading] = useState(false);
+  const [uploaded, setUploaded] = useState(false);
+  const [selectedName, setSelectedName] = useState('');
   const navigate = useNavigate();
+  const fileInputRef = useRef(null);
+  const allowedTypes = ['application/pdf','application/msword','application/vnd.openxmlformats-officedocument.wordprocessingml.document','text/plain'];
+  const maxSizeBytes = 10 * 1024 * 1024; // 10MB
+
+  const onFileChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!allowedTypes.includes(f.type)) {
+      notify.error('Unsupported file', 'Please upload PDF, DOC, DOCX or TXT.');
+      // reset and prompt reselect
+      e.target.value = '';
+      setTimeout(() => fileInputRef.current?.click(), 0);
+      return;
+    }
+    if (f.size > maxSizeBytes) {
+      notify.error('File too large', 'Max size is 10MB. Please choose a smaller file.');
+      e.target.value = '';
+      setTimeout(() => fileInputRef.current?.click(), 0);
+      return;
+    }
+    setSelectedName(f.name);
+    setUploaded(false);
+  };
   const onApply = async ()=>{
     setLoading(true);
     try{
@@ -143,19 +169,79 @@ function ApplyButton({ announcement }){
         return;
       }
 
-      const resp = await announcementsAPI.apply(announcement._id);
-      console.log('[Announcements] Apply response:', resp.data);
-      notify.success('Applied', resp.data?.message || 'Application submitted successfully');
+      // pick file
+      const file = fileInputRef.current?.files?.[0];
+      if (!file) {
+        // If no file selected, open the file dialog
+        fileInputRef.current?.click();
+        setLoading(false);
+        return;
+      }
+      if (!allowedTypes.includes(file.type)) {
+        notify.error('Unsupported file', 'Please upload PDF, DOC, DOCX or TXT.');
+        // reset and prompt reselect
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setLoading(false);
+        setTimeout(() => fileInputRef.current?.click(), 0);
+        return;
+      }
+      if (file.size > maxSizeBytes) {
+        notify.error('File too large', 'Max size is 10MB. Please choose a smaller file.');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        setLoading(false);
+        setTimeout(() => fileInputRef.current?.click(), 0);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('resume', file);
+      const resp = await announcementsAPI.uploadResume(announcement._id, formData);
+      console.log('[Announcements] Upload resume response:', resp.data);
+      setUploaded(true);
+      notify.success('Resume uploaded', 'Now click Apply to submit your application');
     }catch(err){
       console.error('[Announcements] Apply error:', err);
       const msg = err.response?.data?.message || err.message || 'Failed to apply';
       notify.error('Apply failed', msg);
     }finally{ setLoading(false); }
   };
+  const onSubmitApplication = async () => {
+    setLoading(true);
+    try{
+      const token = localStorage.getItem('token');
+      if (!token) {
+        notify.error('Not logged in', 'Please login as a student to apply');
+        setLoading(false);
+        navigate('/login');
+        return;
+      }
+      const resp = await announcementsAPI.apply(announcement._id);
+      console.log('[Announcements] Submit application response:', resp.data);
+      notify.success('Applied', resp.data?.message || 'Application submitted successfully');
+    }catch(err){
+      const msg = err.response?.data?.message || err.message || 'Failed to apply';
+      notify.error('Apply failed', msg);
+    }finally{ setLoading(false); }
+  };
   return (
-    <button disabled={loading} className="ml-2 inline-flex items-center gap-2 rounded-md bg-green-600 px-3 py-1 text-xs text-white" onClick={onApply}>
-      {loading ? 'Applying...' : 'Apply'}
-    </button>
+    <div className="flex items-center gap-2">
+      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.txt" className="hidden" onChange={onFileChange} />
+      {!uploaded ? (
+        <>
+          {selectedName && <span className="text-xs text-gray-600 truncate max-w-[160px]">{selectedName}</span>}
+          <button disabled={loading} className="ml-2 inline-flex items-center gap-2 rounded-md bg-green-600 px-3 py-1 text-xs text-white" onClick={onApply}>
+            {loading ? 'Uploading...' : (selectedName ? 'Upload Resume' : 'Choose & Upload')}
+          </button>
+        </>
+      ) : (
+        <>
+          <span className="text-xs text-green-700">Resume uploaded</span>
+          <button disabled={loading} className="ml-2 inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-1 text-xs text-white" onClick={onSubmitApplication}>
+            {loading ? 'Submitting...' : 'Apply'}
+          </button>
+        </>
+      )}
+    </div>
   );
 }
 

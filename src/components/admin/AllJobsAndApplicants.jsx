@@ -21,6 +21,9 @@ const AllJobsAndApplicants = () => {
   const [expandedJobs, setExpandedJobs] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState('');
   const { error, success } = useNotification();
+  const [applicationsByJob, setApplicationsByJob] = useState({});
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+  const backendBase = apiBase.replace(/\/?api\/?$/, '');
 
   useEffect(() => {
     fetchData();
@@ -32,6 +35,16 @@ const AllJobsAndApplicants = () => {
       const response = await announcementsAPI.getAllJobsAndApplicants();
       if (response.data?.success) {
         setData(response.data);
+        // prefetch applications for each job
+        const jobs = response.data.jobAnnouncements || [];
+        const map = {};
+        await Promise.all(jobs.map(async (job) => {
+          try {
+            const r = await announcementsAPI.getApplications(job._id);
+            map[job._id] = r.data?.applications || [];
+          } catch (e) { map[job._id] = []; }
+        }));
+        setApplicationsByJob(map);
         return;
       }
       error('Failed', response.data?.message || 'Failed to load jobs and applicants data');
@@ -234,7 +247,9 @@ const AllJobsAndApplicants = () => {
                         <p className="text-sm text-gray-500">No applicants yet</p>
                       ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          {job.applicants.map((applicant) => (
+                          {job.applicants.map((applicant) => {
+                            const app = (applicationsByJob[job._id] || []).find(x => x.student?._id === applicant._id);
+                            return (
                             <div key={applicant._id} className="bg-gray-50 rounded-lg p-3">
                               <div className="flex items-center gap-2 mb-1">
                                 <User className="h-4 w-4 text-gray-600" />
@@ -252,8 +267,19 @@ const AllJobsAndApplicants = () => {
                                   <span>Roll: {applicant.rollNumber}</span>
                                 </div>
                               )}
+                              {app && (
+                                <div className="mt-2 flex items-center gap-3">
+                                  <a href={`${backendBase}${app.resumeUrl}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm underline">
+                                    Open Resume
+                                  </a>
+                                  <a href={`${backendBase}${app.resumeUrl}`} download className="text-sm text-gray-700 underline">
+                                    Download
+                                  </a>
+                                  <span className="text-xs text-gray-500 truncate">{app.resumeOriginalName}</span>
+                                </div>
+                              )}
                             </div>
-                          ))}
+                          );})}
                         </div>
                       )}
                     </div>
