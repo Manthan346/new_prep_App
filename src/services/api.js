@@ -56,34 +56,35 @@ api.interceptors.response.use(
 // Student API
 export const studentAPI = {
   getAllStudents: (params = {}) => api.get('/students/', { params }),
-  // backend exposes GET /api/dashboard/student
   getDashboard: () => api.get('/dashboard/student'),
-  getResults: (params = {}) => api.get('/dashboard/student/results', { params }),
-  getPerformance: () => api.get('/dashboard/student/performance'),
-  getStudentPerformance: (studentId) =>
-    api.get(`/dashboard/student/performance/${studentId}`),
 };
 
-// Test API
+// Dashboard API
+export const dashboardAPI = {
+  // backend exposes GET /api/dashboard/student
+  getStudentDashboard: () => api.get('/dashboard/student'),
+  getTeacherDashboard: () => api.get('/dashboard/teacher'),
+  getAdminDashboard: () => api.get('/dashboard/admin'),
+};
+
+// Tests API
 export const testAPI = {
-  getTests: params => api.get('/tests', { params }),
-  getTest: id => api.get(`/tests/${id}`),
-  createTest: data => api.post('/tests', data),
+  getTests: (params) => api.get('/tests', { params }),
+  getTest: (id) => api.get(`/tests/${id}`),
+  createTest: (data) => api.post('/tests', data),
   updateTest: (id, data) => api.put(`/tests/${id}`, data),
-  deleteTest: id => api.delete(`/tests/${id}`),
+  deleteTest: (id) => api.delete(`/tests/${id}`),
 
-  getTestMarks: id => api.get(`/tests/${id}/marks`),
+  // marks endpoints
   addOrUpdateMarks: (id, data) => api.post(`/tests/${id}/marks`, data),
-  getTestResults: id => api.get(`/tests/${id}/results`),
-  getTestStatistics: id => api.get(`/tests/${id}/statistics`)
+  getTestResults: (id) => api.get(`/tests/${id}/results`),
+  getTestStatistics: (id) => api.get(`/tests/${id}/statistics`),
 };
 
-// Subject API
+// Subjects API (only GET exists on backend)
 export const subjectAPI = {
   getAllSubjects: (params = {}) => api.get('/subjects', { params }),
-  createSubject: (data) => api.post('/subjects', data),
-  updateSubject: (id, data) => api.put(`/subjects/${id}`, data),
-  deleteSubject: (id) => api.delete(`/subjects/${id}`),
+  getSubjectById: (id) => api.get(`/subjects/${id}`),
 };
 
 // Auth API
@@ -91,24 +92,19 @@ export const authAPI = {
   login: (credentials) => api.post('/auth/login', credentials),
   register: (userData) => api.post('/auth/register', userData),
   verifyToken: () => api.get('/auth/verify'),
-  refreshToken: () => api.post('/auth/refresh'),
-};
-
-// Dashboard API (admin)
-export const dashboardAPI = {
-  getAdminDashboard: () => api.get('/dashboard'),
 };
 
 // Announcements API
 export const announcementsAPI = {
   list: (params = {}) => api.get('/announcements', { params }),
   get: (id) => api.get(`/announcements/${id}`),
-  create: (data) => api.post('/announcements', data)
-  ,
+  getAnnouncementDetails: (id) => api.get(`/announcements/${id}`),
+  create: (data) => api.post('/announcements', data),
   update: (id, data) => api.put(`/announcements/${id}`, data),
   remove: (id) => api.delete(`/announcements/${id}`),
   apply: (id) => api.post(`/announcements/${id}/apply`),
   getApplicants: (id) => api.get(`/announcements/${id}/applicants`),
+  getAllJobsAndApplicants: () => api.get('/announcements/jobs/all-applicants'),
 };
 
 // Utility functions

@@ -27,6 +27,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       { name: 'Tests', href: '/tests', icon: FileText },
       { name: 'Students', href: '/students', icon: Users },
       { name: 'Announcements', href: '/announcements', icon: Megaphone },
+      { name: 'All Jobs & Applicants', href: '/admin/jobs-applicants', icon: Users },
       { name: 'Admin Panel', href: '/admin', icon: Settings },
     ];
   } else if (user?.role === 'teacher') {
@@ -42,6 +43,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       { name: 'Announcements', href: '/announcements', icon: Megaphone },
     ];
   }
+  
 
   const navigation = [...baseNavigation, ...roleNavigation];
 

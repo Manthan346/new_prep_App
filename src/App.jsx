@@ -14,6 +14,7 @@ import StudentsPage from './pages/StudentsPage';
 import Performance from './pages/Performance';
 import Announcements from './pages/Announcements';
 import AnnouncementApplicants from './pages/AnnouncementApplicants';
+import AllJobsAndApplicants from './components/admin/AllJobsAndApplicants';
 
 // Import components
 import Layout from './components/layout/Layout';
@@ -156,6 +157,17 @@ const AppRoutes = () => {
           <ProtectedRoute allowedRoles={['admin']}>
             <Layout>
               <AnnouncementApplicants />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/admin/jobs-applicants"
+        element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <Layout>
+              <AllJobsAndApplicants />
             </Layout>
           </ProtectedRoute>
         }

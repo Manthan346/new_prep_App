@@ -33,7 +33,11 @@ export default function AnnouncementsPage() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await announcementsAPI.list();
+      const params = {};
+      if (user?.role === 'student' && user?.department) {
+        params.department = user.department;
+      }
+      const res = await announcementsAPI.list(params);
       setItems(res.data.announcements || []);
     } catch (err) {
       console.error(err);
@@ -46,11 +50,11 @@ export default function AnnouncementsPage() {
     <div className="p-4">
       <div className="max-w-3xl mx-auto">
         {user && user.role === 'admin' && (
-          <div className="mb-4"><AdminAnnouncementForm onCreated={(a)=>setItems(prev=>[a, ...prev])} /></div>
+          <div className="mb-4"><AdminAnnouncementForm onCreated={()=>load()} /></div>
         )}
 
         <h2 className="text-2xl font-bold mb-3">Announcements</h2>
-  {loading ? <div>Loading...</div> : <AnnouncementsList items={items} onUpdate={handleUpdate} onDelete={handleDelete} currentUser={user} />}
+        {loading ? <div>Loading...</div> : <AnnouncementsList items={items} onUpdate={handleUpdate} onDelete={handleDelete} currentUser={user} />}
       </div>
     </div>
   );
