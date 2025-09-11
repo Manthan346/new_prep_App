@@ -5,7 +5,7 @@ import axios from 'axios';
 
 // Create axios instance with default configuration
 const api = axios.create({
-  baseURL: 'https://placenetbackend.vercel.app/api',
+  baseURL: import.meta.env.VITE_API_URL,
   timeout: 30000, // 30 seconds timeout
 });
 
